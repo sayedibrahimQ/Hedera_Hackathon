@@ -1,57 +1,67 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 
-class FundingRequest(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-        ('active', 'Active'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
+User = get_user_model()
 
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    amount_requested = models.DecimalField(max_digits=18, decimal_places=2)
-    milestones = models.JSONField()  # Stores milestones as JSON
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='funding_requests')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class LoanRequest(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('ACTIVE', 'Active'),
+        ('COMPLETED', 'Completed'),
+        ('DEFAULTED', 'Defaulted'),
+    )
 
-    def __str__(self):
-        return self.title
+    COLLATERAL_CHOICES = (
+        ('OFD', 'OFD'),
+        ('NFT', 'NFT'),
+        ('INVOICE', 'Invoice'),
+        ('DIGITAL_ASSET', 'Digital Asset'),
+    )
 
-class Investment(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('refunded', 'Refunded'),
-    ]
-
-    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='investments')
-    funding_request = models.ForeignKey(FundingRequest, on_delete=models.CASCADE, related_name='investments')
-    amount = models.DecimalField(max_digits=18, decimal_places=2)
-    tx_hash = models.CharField(max_length=255, blank=True, null=True)  # Hedera transaction hash
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    borrower = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    duration = models.IntegerField()  # in months
+    purpose = models.TextField()
+    repayment_schedule = models.JSONField()
+    business_plan = models.FileField(upload_to='business_plans/', null=True, blank=True)
+    collateral_type = models.CharField(max_length=20, choices=COLLATERAL_CHOICES, null=True, blank=True)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    funded_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Investment by {self.investor.username} in {self.funding_request.title}"
+        return f"Loan request of {self.amount} for {self.borrower}"
 
-class Milestone(models.Model):
-    funding_request = models.ForeignKey(FundingRequest, on_delete=models.CASCADE, related_name='project_milestones')
-    title = models.CharField(max_length=255)
-    order = models.PositiveIntegerField()
-    is_completed = models.BooleanField(default=False)
-    is_verified = models.BooleanField(default=False)
-    proof_url = models.URLField(max_length=500, blank=True, null=True)
-
-    class Meta:
-        ordering = ['order']
-        unique_together = ('funding_request', 'order')
+class Loan(models.Model):
+    request = models.OneToOneField(LoanRequest, on_delete=models.CASCADE)
+    lenders = models.ManyToManyField(User)
+    is_funded = models.BooleanField(default=False)
+    hcs_topic_id = models.CharField(max_length=255, blank=True, null=True)
+    multi_sig_account_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"Milestone {self.order} for {self.funding_request.title}"
+        return f"Loan for request {self.request.id}"
+
+class LoanTransaction(models.Model):
+    TRANSACTION_TYPE_CHOICES = (
+        ('FUNDING', 'Funding'),
+        ('REPAYMENT', 'Repayment'),
+    )
+
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    hedera_transaction_id = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.transaction_type} of {self.amount} for loan {self.loan.id}"
+
+    @property
+    def explorer_link(self):
+        if self.hedera_transaction_id:
+            return f"https://hashscan.io/mainnet/transaction/{self.hedera_transaction_id}"
+        return None

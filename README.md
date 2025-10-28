@@ -1,86 +1,73 @@
 
 # NileFi
 
-## Real Estate Tokenization and Rental Management Platform
+NileFi is a real estate tokenization and investment platform built with Django and Hedera Hashgraph.
 
-NileFi is a decentralized platform that leverages the Hedera Hashgraph network to revolutionize the real estate industry. It enables property owners to tokenize their assets, representing them as digital tokens on the blockchain. This opens up new avenues for fractional ownership, simplified property transfers, and transparent rental management.
+## Features
 
-## Key Features
-
-- **Real Estate Tokenization:** Convert real estate assets into digital tokens on the Hedera network.
-- **Fractional Ownership:** Enable multiple investors to co-own a single property.
-- **Decentralized Rental Management:** Automate rent collection and agreement enforcement through smart contracts.
-- **Secure and Transparent:** Leverage the security and transparency of the Hedera Hashgraph network.
+* **Real Estate Tokenization:** Tokenize real estate assets on the Hedera network as Non-Fungible Tokens (NFTs).
+* **Fractional Ownership:** Invest in fractional ownership of real estate assets.
+* **Rental Agreements:** Create and manage rental agreements on the Hedera network.
+* **Crowdfunding:** Raise funds for real estate projects through a crowdfunding platform.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.10+
-- Poetry
-- Docker
-- Docker Compose
+* Python 3.11
+* Poetry
+* A Hedera testnet account
 
 ### Installation
 
-1. **Clone the repository:**
-
+1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/nilefi.git
    ```
-
-2. **Install dependencies:**
-
+2. Install the dependencies:
    ```bash
    poetry install
    ```
+3. Set up your Hedera testnet account:
+   - Create a `.env` file in the `nilefi` directory.
+   - Add the following environment variables to the `.env` file:
+     ```
+     HEDERA_ACCOUNT_ID="your-account-id"
+     HEDERA_PRIVATE_KEY="your-private-key"
+     TREASURY_ACCOUNT_ID="your-treasury-account-id"
+     TREASURY_PRIVATE_KEY="your-treasury-private-key"
+     ```
+   **Note:** The `TREASURY_ACCOUNT_ID` and `TREASURY_PRIVATE_KEY` are used for creating and managing tokens. This should be a separate account from your personal account.
 
-3. **Set up environment variables:**
-
-   Create a `.env` file in the root directory and add the following:
-
-   ```
-   SECRET_KEY=your-secret-key
-   DEBUG=True
-   DATABASE_URL=psql://user:password@db/nilefi
-   HEDERA_ACCOUNT_ID=your-hedera-account-id
-   HEDERA_PRIVATE_KEY=your-hedera-private-key
-   ```
-
-4. **Run database migrations:**
-
+4. Run the database migrations:
    ```bash
    poetry run python manage.py migrate
    ```
-
-5. **Start the development server:**
-
+5. Start the development server:
    ```bash
    poetry run python manage.py runserver
    ```
 
 ## API Endpoints
 
-The following API endpoints are available:
-
-- **`POST /api/blockchain/accounts/`**: Create a new Hedera account.
-- **`POST /api/blockchain/tokenize/`**: Tokenize a real estate asset.
-- **`POST /api/blockchain/rental-agreements/`**: Create a rental agreement.
-- **`GET /api/users/`**: Retrieve a list of users.
-- **`POST /api/users/`**: Create a new user.
-
-## Smart Contracts
-
-The smart contracts for the NileFi platform are located in the `contracts` directory. They are written in Solidity and compiled using the Hardhat development environment.
-
-### `NileFi.sol`
-
-This contract manages the tokenization of real estate assets and the creation of rental agreements.
-
-## OFD Integration
-
-The NileFi platform integrates with the Open Finance Data (OFD) API to retrieve property data and verify ownership. The OFD integration code is located in the `nilefi/apps/blockchain/ofd_integration.py` file.
-
-## Hedera Integration
-
-The NileFi platform uses the Hedera Python SDK to interact with the Hedera network. The Hedera integration code is located in the `nilefi/apps/blockchain/wallet_utils.py` and `nilefi/apps/blockchain/transactions.py` files.
+* `api/accounts/`: User registration, login, and profile management.
+* `api/blockchain/`: Blockchain-related operations.
+    *   `POST /api/blockchain/tokenize/`: Tokenize a real estate asset.
+        *   **Body:**
+            ```json
+            {
+                "asset_id": "unique-asset-identifier",
+                "token_name": "My Real Estate Token",
+                "token_symbol": "MRET"
+            }
+            ```
+    *   `POST /api/blockchain/rental-agreements/`: Create a rental agreement.
+        *   **Body:**
+            ```json
+            {
+                "tenant_id": "hedera-tenant-account-id",
+                "landlord_id": "hedera-landlord-account-id",
+                "rent_amount": 1000
+            }
+            ```
+* `api/funding/`: Crowdfunding operations, such as creating funding requests and investing in projects.

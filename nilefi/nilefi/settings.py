@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'nilefi.apps.users',
     'nilefi.apps.blockchain',
     'nilefi.apps.common',
+    'nilefi.apps.accounts',
+    'nilefi.apps.funding',
+    'nilefi.apps.analytics',
 ]
 
 # -------------------------------------------------

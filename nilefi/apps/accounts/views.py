@@ -1,49 +1,66 @@
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.contrib.auth import get_user_model
-from .serializers import RegisterSerializer, UserSerializer
+from rest_framework import generics, views, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-User = get_user_model()
+from nilefi.apps.accounts.models import User
+from nilefi.apps.accounts.serializers import RegisterSerializer, UserSerializer
+from nilefi.apps.blockchain.wallet_utils import create_account
+
 
 class RegisterView(generics.CreateAPIView):
+    """View for user registration."""
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
 
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
-    """
-    GET -> current user profile
-    PATCH -> update certain fields (display_name, wallet_id)
-    """
+class UserProfileView(generics.RetrieveAPIView):
+    """View for retrieving user profile."""
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
 
-    def patch(self, request, *args, **kwargs):
-        # allow updating display_name and wallet_id via patch
-        user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
 
-
-# A small convenience endpoint to set wallet_id for the authenticated user
-class SetWalletView(APIView):
-    permission_classes = [IsAuthenticated]
+class SetWalletView(views.APIView):
+    """View for setting or creating a user's wallet."""
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        wallet_id = request.data.get('wallet_id')
-        if not wallet_id:
-            return Response({"detail": "wallet_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        """Create a new Hedera account and link it to the user."""
         user = request.user
-        user.wallet_id = wallet_id
-        user.save(update_fields=['wallet_id'])
-        return Response({"wallet_id": user.wallet_id}, status=status.HTTP_200_OK)
+        if user.wallet_id:
+            return Response(
+                {"error": "User already has a wallet."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        private_key, public_key, account_id = create_account()
+        user.wallet_id = account_id.toString()
+        user.save()
+
+        return Response({
+            "wallet_id": user.wallet_id,
+            "private_key": private_key.toString(),
+            "public_key": public_key.toString()
+        }, status=status.HTTP_201_CREATED)
+
+
+class KYCUploadView(views.APIView):
+    """View for uploading KYC documents."""
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Handles KYC document upload.
+        In a real application, you would save the file and trigger a verification process.
+        For now, we'll just mark the user as kyc_verified.
+        """
+        user = request.user
+        # In a real app: handle file upload, save it, and queue for verification
+        # For example: serializer = KYCDocumentSerializer(data=request.data)
+        # if serializer.is_valid(): ...
+        user.kyc_verified = True
+        user.save()
+        return Response({"status": "KYC verification pending"}, status=status.HTTP_200_OK)
