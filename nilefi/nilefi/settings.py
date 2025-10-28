@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -33,11 +34,9 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local apps
-    'apps.accounts',
-    'apps.funding',
-    'apps.blockchain',
-    'apps.analytics',
-    'apps.common',
+    'nilefi.apps.users',
+    'nilefi.apps.blockchain',
+    'nilefi.apps.common',
 ]
 
 # -------------------------------------------------
@@ -90,7 +89,7 @@ DATABASES = {
 # -------------------------------------------------
 # AUTHENTICATION
 # -------------------------------------------------
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -102,9 +101,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
@@ -112,51 +111,30 @@ SIMPLE_JWT = {
 # CORS CONFIGURATION
 # -------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['*']
-CORS_EXPOSE_HEADERS = ['Authorization']
 
 # -------------------------------------------------
 # STATIC & MEDIA FILES
 # -------------------------------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # -------------------------------------------------
 # HEDERA & OFD CONFIGURATION
 # -------------------------------------------------
-HEDERA_ACCOUNT_ID = os.getenv('HEDERA_ACCOUNT_ID', '')
-HEDERA_PRIVATE_KEY = os.getenv('HEDERA_PRIVATE_KEY', '')
+HEDERA_ACCOUNT_ID = os.getenv('HEDERA_ACCOUNT_ID')
+HEDERA_PRIVATE_KEY = os.getenv('HEDERA_PRIVATE_KEY')
 HEDERA_NETWORK = os.getenv('HEDERA_NETWORK', 'testnet')
 
-OFD_CONTRACT_ID = os.getenv('OFD_CONTRACT_ID', '')
-OFD_TOKEN_ID = os.getenv('OFD_TOKEN_ID', '')
-
-# -------------------------------------------------
-# LOGGING (Optional)
-# -------------------------------------------------
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-}
+OFD_CONTRACT_ID = os.getenv('OFD_CONTRACT_ID')
+OFD_TOKEN_ID = os.getenv('OFD_TOKEN_ID')
 
 # -------------------------------------------------
 # INTERNATIONALIZATION
 # -------------------------------------------------
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Africa/Cairo'
+TIME_ZONE = 'UTC'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

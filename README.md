@@ -1,124 +1,86 @@
-# NileFi — Decentralized SME Funding on Hedera
 
-NileFi is a blockchain-powered platform that enables transparent, milestone-based funding for small and medium enterprises (SMEs) in Africa.
-Built using Django, Tailwind CSS, and the Hedera SDK, NileFi ensures transparency, automation, and trust between startups and investors.
+# NileFi
 
-## Overview
+## Real Estate Tokenization and Rental Management Platform
 
-NileFi connects investors and businesses through an on-chain funding system.
-Funds are held in Hedera smart escrow contracts and released only when verified milestones are completed.
+NileFi is a decentralized platform that leverages the Hedera Hashgraph network to revolutionize the real estate industry. It enables property owners to tokenize their assets, representing them as digital tokens on the blockchain. This opens up new avenues for fractional ownership, simplified property transfers, and transparent rental management.
 
-Core MVP Flow
+## Key Features
 
-Startup creates a funding request with milestones.
+- **Real Estate Tokenization:** Convert real estate assets into digital tokens on the Hedera network.
+- **Fractional Ownership:** Enable multiple investors to co-own a single property.
+- **Decentralized Rental Management:** Automate rent collection and agreement enforcement through smart contracts.
+- **Secure and Transparent:** Leverage the security and transparency of the Hedera Hashgraph network.
 
-Investor funds the project (escrow contract on Hedera).
+## Getting Started
 
-Milestones are verified by a trusted entity or AI system.
+### Prerequisites
 
-Smart contract releases funds automatically.
+- Python 3.10+
+- Poetry
+- Docker
+- Docker Compose
 
-All transactions are visible on the Hedera network for full transparency.
+### Installation
 
-# Tech Stack
-Layer	Technology
-Backend	Django + Django REST Framework
-Frontend	Django Templates + Tailwind CSS
-Blockchain	Hedera SDK (Python)
-Database	PostgreSQL
-Wallet Integration	HashPack / Blade Wallet
-Optional AI	Credit Scoring & Startup Risk Analysis
-# Key Features
+1. **Clone the repository:**
 
-- Smart Escrow Contracts – Automates secure milestone-based payments.
+   ```bash
+   git clone https://github.com/your-username/nilefi.git
+   ```
 
-- Transparent Funding Requests – Startups submit structured project proposals.
+2. **Install dependencies:**
 
-- Investor Dashboard – Monitor project progress and fund flow.
+   ```bash
+   poetry install
+   ```
 
-- AI Credit Scoring (Optional) – Evaluate startup risk based on business data.
+3. **Set up environment variables:**
 
-- Regional Focus – Tailored for African & Egyptian SMEs.
+   Create a `.env` file in the root directory and add the following:
 
-- Modern UI – Built with Tailwind for clean, responsive design.
+   ```
+   SECRET_KEY=your-secret-key
+   DEBUG=True
+   DATABASE_URL=psql://user:password@db/nilefi
+   HEDERA_ACCOUNT_ID=your-hedera-account-id
+   HEDERA_PRIVATE_KEY=your-hedera-private-key
+   ```
 
-# Installation & Setup
-1. Clone the repository
-git clone https://github.com/<your-username>/nilefi.git
-cd nilefi
+4. **Run database migrations:**
 
-2. Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```bash
+   poetry run python manage.py migrate
+   ```
 
-3. Install dependencies
-pip install -r requirements.txt
+5. **Start the development server:**
 
-4. Run Tailwind
-python manage.py tailwind install
-python manage.py tailwind start
+   ```bash
+   poetry run python manage.py runserver
+   ```
 
-5. Run the Django server
-python manage.py migrate
-python manage.py runserver
+## API Endpoints
 
+The following API endpoints are available:
 
-Then visit: http://127.0.0.1:8000
+- **`POST /api/blockchain/accounts/`**: Create a new Hedera account.
+- **`POST /api/blockchain/tokenize/`**: Tokenize a real estate asset.
+- **`POST /api/blockchain/rental-agreements/`**: Create a rental agreement.
+- **`GET /api/users/`**: Retrieve a list of users.
+- **`POST /api/users/`**: Create a new user.
 
-# Project Structure
-nilefi/
-│
-├── core/                # Main Django app (models, views, URLs)
-├── theme/               # Tailwind integration
-├── templates/           # Django templates (HTML pages)
-│   ├── index.html
-│   ├── dashboard_business.html
-│   ├── dashboard_investor.html
-│   ├── project_detail.html
-│   ├── credit_scoring.html
-│
-├── static/              # Compiled Tailwind assets
-├── manage.py
-└── requirements.txt
+## Smart Contracts
 
-# Core Pages
-Page	Description
-/	Landing Page
-/register	Signup with wallet
-/dashboard/business	Create & track funding requests
-/dashboard/investor	View & fund startups
-/project/<id>	Project details and milestones
-/credit-scoring	Startup data collection for AI Scoring
-🪙 Smart Contract Flow
+The smart contracts for the NileFi platform are located in the `contracts` directory. They are written in Solidity and compiled using the Hardhat development environment.
 
-Investor funds a project → Hedera escrow smart contract holds funds.
+### `NileFi.sol`
 
-Business marks milestone as complete → verification process starts.
+This contract manages the tokenization of real estate assets and the creation of rental agreements.
 
-Once verified, funds are released automatically to the business wallet.
+## OFD Integration
 
-Transactions are visible through the Hedera Mirror Node API.
+The NileFi platform integrates with the Open Finance Data (OFD) API to retrieve property data and verify ownership. The OFD integration code is located in the `nilefi/apps/blockchain/ofd_integration.py` file.
 
-# Future Enhancements
+## Hedera Integration
 
-DAO-based investor pools
-
-Decentralized reputation system
-
-Real-time Hedera mirror node dashboard
-
-AI-powered credit score visualization
-
-# Contributors
-
-Sayed Ibrahim — Backend & Hedera Integration
-
-Frontend Team — Django Templates + Tailwind UI
-
-AI Team — Credit Scoring & Analytics
-
-# Hackathon Submission
-
-Built for Hedera x DoraHacks Hackathon 2025
-Category: DeFi / AI for Financial Inclusion
-Focus: Blockchain-backed SME Funding in Africa
+The NileFi platform uses the Hedera Python SDK to interact with the Hedera network. The Hedera integration code is located in the `nilefi/apps/blockchain/wallet_utils.py` and `nilefi/apps/blockchain/transactions.py` files.
