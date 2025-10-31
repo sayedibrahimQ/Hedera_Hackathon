@@ -34,12 +34,11 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local apps
-    'nilefi.apps.users',
-    'nilefi.apps.blockchain',
-    'nilefi.apps.common',
-    'nilefi.apps.accounts',
-    'nilefi.apps.funding',
-    'nilefi.apps.analytics',
+    'blockchain',
+    'common',
+    'accounts',
+    'funding',
+    'analytics',
 ]
 
 # -------------------------------------------------
@@ -92,7 +91,7 @@ DATABASES = {
 # -------------------------------------------------
 # AUTHENTICATION
 # -------------------------------------------------
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
